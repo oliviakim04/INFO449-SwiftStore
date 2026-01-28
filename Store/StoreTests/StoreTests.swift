@@ -66,4 +66,65 @@ TOTAL: $7.97
 """
         XCTAssertEqual(expectedReceipt, receipt.output())
     }
+    
+    func testEmptyReceipt() {
+        XCTAssertEqual(0, register.subtotal())
+        
+        let receipt = register.total()
+        XCTAssertEqual(0, receipt.total())
+        
+        let expectedReceipt = """
+Receipt:
+------------------
+TOTAL: $0.00
+"""
+        XCTAssertEqual(expectedReceipt, receipt.output())
+    }
+    
+    
+    func testTotalResetsRegister() {
+        let item = Item(name: "Granola", priceEach: 499)
+        register.scan(item)
+        
+        XCTAssertEqual(499, register.subtotal())
+        
+        let receipt = register.total()
+        XCTAssertEqual(499, receipt.total())
+        
+        XCTAssertEqual(0, register.subtotal())
+        
+        let newReceipt = register.total()
+        XCTAssertEqual(0, newReceipt.total())
+    }
+    
+    func testMultipleReceiptsIndependence() {
+        let item1 = Item(name: "Beans", priceEach: 199)
+        let item2 = Item(name: "Pencil", priceEach: 99)
+        
+        register.scan(item1)
+        let receipt1 = register.total()
+        
+        register.scan(item2)
+        let receipt2 = register.total()
+        
+        XCTAssertEqual(199, receipt1.total())
+        XCTAssertEqual(99, receipt2.total())
+        
+        XCTAssertNotEqual(receipt1.total(), receipt2.total())
+    }
+    
+    func testItemsMethodReturnsCorrectList() {
+        let beans = Item(name: "Beans", priceEach: 199)
+        let pencil = Item(name: "Pencil", priceEach: 99)
+        
+        register.scan(beans)
+        register.scan(pencil)
+        
+        let receipt = register.total()
+        let items = receipt.items()
+        
+        XCTAssertEqual(2, items.count)
+        XCTAssertEqual("Beans", items[0].name)
+        XCTAssertEqual("Pencil", items[1].name)
+    }
 }
